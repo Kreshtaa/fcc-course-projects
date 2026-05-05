@@ -47,8 +47,5 @@ class Square(Rectangle):
         self.width = side_length
         self.height = side_length
 
-    def set_area(self):
-        Rectangle.super()
-
     def __str__(self):
         return f"Square(side={self.width})"
