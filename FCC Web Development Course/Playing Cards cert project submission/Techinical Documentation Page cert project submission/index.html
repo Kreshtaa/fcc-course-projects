@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Technical Documentation Page</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <nav id="navbar">
+      <header>[KreshEdit]</header>
+      <a class="nav-link" href="#What_is_KreshEdit?">What is KreshEdit?</a>
+      <a class="nav-link" href="#Architecture">Architecture</a>
+      <a class="nav-link" href="#Supported_formats">Supported formats</a>
+      <a class="nav-link" href="#Adding_new_modules">Adding new modules</a>
+      <a class="nav-link" href="#How_to_use_it?">How to use it?</a>
+    </nav>
+    <main id="main-doc">
+      <section id="What_is_KreshEdit?" class="main-section">
+        <header>What is KreshEdit?</header>
+        <p>KreshEdit is a modular, private save editor for visual novels, interactive novels, and other small games.</p>
+        <p>It runs entirely in your browser - no installs, no servers, no data ever leaves your machine.</p>
+      </section>
+      <section id="Architecture" class="main-section">
+        <header>Architecture</header>
+        <p>KreshEdit features a robust modular architecure. This makes adding new modules relatively simple in principle. Each module follows the same Detect &gt; Decode &gt; Encode pattern outlined in <code>module_template.js</code>. The full outline of the project files can be found below:</p>
+        <pre><code>
+  KreshEdit/
+      ├── index.html
+      ├── main.js
+      ├── style.css
+      └── modules/
+          ├── _utils.js          — shared helpers + pako loader (window.KreshUtils, window.KreshPako)
+          ├── module_template.js — copy this to add a new format
+          ├── sugarcube.js
+          ├── rpgmaker_mv.js
+          ├── gzip_json.js
+          ├── renpy.js
+          ├── unity_json.js
+          ├── unreal_json.js
+          ├── lzstring.js
+          └── html.js
+        </code></pre>
+      </section>
+      <section id="Supported_formats" class="main-section">
+        <header>Supported formats</header>
+        <p>The current list of supported formats and encodings is as follows, in the format <code>Format: Encodings</code></p>
+        <ul class="formatlist">
+          <li>SugarCube/Twine: Plain JSON, Base64 JSON, Base64 + zlib JSON</li>
+          <li>RPGMaker MV/MZ: Base64 + zlib JSON</li>
+          <li>Ren'Py: Pickle (raw + gzip) via Pyodide</li>
+          <li>Unity JSON:  Plain JSON, Base64 JSON</li>
+          <li>Unreal JSON: Plain JSON</li>
+          <li>LZString: compressToBase64, compressToEncodedURIComponent</li>
+          <li>Gzip JSON: Raw gzip-compressed JSON</li>
+          <li>Generic JSON: Plain JSON, Base64 JSON</li>
+        </ul>
+        <p>Binary formats (Unreal GVAS, Unity binary serialization, RAGS) are not supported.</p>
+        <p>Ren'Py support is experimental. Saves composed of standard dicts, lists, and primitives round-trip cleanly. Custom Python classes are represented as annotated JSON and restored as plain dicts — exact fidelity is not guaranteed for all games.</p>
+        <p>Due to the modular nature of this tool, this list is not definitive and can be added to relatively easily if need be.</p>
+      </section>
+      <section id="Adding_new_modules" class="main-section">
+        <header>Adding new modules</header>
+        <p>As previously mentioned, since this tool is built in a modular fashion, new modules can be added if need be by following the following instructions.</p>
+        <p>
+          Copy <code>modules/module_template.js</code>, rename it, and implement these three functions:
+          <ol>
+            <li><code>function detect(buffer)</code> → boolean (sync, must not throw)</li>
+            <li><code>function decode(buffer)</code> → <code>{ text, metadata }</code> (may be async, may throw)</li>
+            <li><code>function encode(text, metadata)</code> → Uint8Array (may be async, may throw)
+          </ol>
+        </p>
+        <p>
+          Then do the following:
+          <ol>
+            <li>Add a <code>&lt;script&gt;</code> tag for your file in <code>index.html</code> (before <code>main.js</code>).</li>
+            <li>Add the module name to <code>MODULE_NAMES</code> in <code>main.js</code>. Order matters — more specific formats before broader ones.</li>
+          </ol>
+        </p>
+        <p></p>
+      </section>
+      <section id="How_to_use_it?" class="main-section">
+        <header>How to use it?</header>
+        <p>The tool can be used either online or locally. The hosted version can be found at <a href="https://editor.kreshy.com/" target="_blank">editor.kreshy.com</a>. All processing is done locally so no data leaves your browser.</p>
+        <p>Alternatively, as mentioned, this tool can be used locally. You may have to use a local HTTP server to do this since some browsers reject CDN requests or file access when opening <code>index.html</code> locally via <code>file://</code>.</p>
+        <p>
+          Therefore to run the tool locally first run <code>python3 -m http.server</code> in your terminal from the KreshEdit directory, and then open <code>http://localhost:8000</code> in your browser. This method requires <code>python3</code> to be present on your system.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
